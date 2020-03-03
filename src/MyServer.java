@@ -16,15 +16,24 @@ import java.net.*;
 public class MyServer 
 { 
 
-	// Active clients Storage & Count
+	// Active cClients Storage & Count
 	static Vector<ClientController> activeClients = new Vector<>(); 
 	static int count = 0; 
+
+	static Vector<String> fileList = new Vector<>();
+	
 
 	public static void main(String[] args) throws IOException 
 	{ 
 		
 		ServerSocket sServer = new ServerSocket(1001); 		
 		Socket s; 
+
+		FileInputStream fileIS = new FileInputStream("./files/index.html");
+		byte b[] = new byte [9999];
+		fileIS.read(b, 0, b.length);
+		OutputStream fileOS = s.getOutputStream();
+		fileOS.write(b, 0, b.length);
 		
 		// infinite loop to catch new clients 
 		while (true) 
@@ -80,6 +89,10 @@ class ClientController implements Runnable
 		this.isloggedin=true; 
 	} 
 
+    void files() {
+
+	}
+	
 	@Override
 	public void run() { 
 
@@ -99,7 +112,14 @@ class ClientController implements Runnable
 					this.isloggedin=false; 
 					this.s.close(); 
 					break; 
-				} 
+				}
+
+				//File Query
+				if(sReceived.equals("!files"))
+				{ 
+					files();
+					continue; 
+				}  
 				
 				// String Parsing (seperating message and recipient)
 				StringTokenizer sToken = new StringTokenizer(sReceived, "#"); 

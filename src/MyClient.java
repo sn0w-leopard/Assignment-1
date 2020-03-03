@@ -25,9 +25,15 @@ public class MyClient
 		// establish the connection 
 		Socket s = new Socket(ip, ServerPort); 
 		
-		// obtaining input and out streams 
+		//input and out streams 
 		DataInputStream inStream = new DataInputStream(s.getInputStream()); 
-		DataOutputStream outStream = new DataOutputStream(s.getOutputStream()); 
+		DataOutputStream outStream = new DataOutputStream(s.getOutputStream());
+
+		byte[] b = new byte[9999];
+		InputStream is = s.getInputStream();
+		FileOutputStream fr = new FileOutputStream("./success.html");
+		is.read(b,0,b.length);
+		fr.write(b,0,b.length);
 
 		// sendMessage thread 
 		Thread sendMessage = new Thread(new Runnable() 
