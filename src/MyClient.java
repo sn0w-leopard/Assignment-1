@@ -7,13 +7,15 @@ Client Side Services
 Establishes connection to server, sends & recieve messages (seperate threads for each act)
 */
 
-import java.io.*; 
-import java.net.*; 
-import java.util.Scanner; 
+import java.io.*;
+import java.net.*;
+import java.util.Scanner;
+
 
 public class MyClient 
 { 
-	final static int ServerPort = 1001; 
+	final static int ServerPort = 6969;
+
 
 	public static void main(String args[]) throws UnknownHostException, IOException 
 	{ 
@@ -29,12 +31,23 @@ public class MyClient
 		DataInputStream inStream = new DataInputStream(s.getInputStream()); 
 		DataOutputStream outStream = new DataOutputStream(s.getOutputStream());
 
-		byte[] b = new byte[9999];
+		//File transfer streams
+		byte[] b = new byte[9999999];
 		InputStream is = s.getInputStream();
 		FileOutputStream fr = new FileOutputStream("./success.html");
-		is.read(b,0,b.length);
-		fr.write(b,0,b.length);
+		BufferedOutputStream bos = new BufferedOutputStream(fr);
+		int bytesRead = is.read(b, 0, b.length);
+		System.out.println("recieve complete: " + b.length);
 
+		bos.write(b, 0, bytesRead);
+		System.out.println("write complete: " + bytesRead);
+
+		bos.close();
+		s.close();
+
+		
+
+/* 
 		// sendMessage thread 
 		Thread sendMessage = new Thread(new Runnable() 
 		{ 
@@ -74,39 +87,31 @@ public class MyClient
 			} 
 		}); 
 
+		// readFile thread 
+		Thread readFile = new Thread(new Runnable() 
+		{ 
+			@Override
+			public void run() { 
+
+				while (true) { 
+					try { 
+						// read the message sent to this client 
+						int bSize = is.read(b,0,b.length);
+						fr.write(b,0,bSize); 
+						System.out.println("Copy Complete"); 
+					} catch (IOException e) { 
+
+						e.printStackTrace(); 
+					} 
+				} 
+			} 
+		}); 
+
 		sendMessage.start(); 
 		readMessage.start(); 
-
+		readFile.start();
+ */
 	} 
 } 
 
 
-
-
-
-/* 
-//ftp but wrong way and corrupts file
-import java.io.BufferedOutputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.net.Socket;
-
-public class MyClient {
-  public static void main(String[] argv) throws Exception {
-    // Creation of socket and input streams to recieve user input and to pass information between client and server 
-    Socket sock = new Socket("127.0.0.1", 5000);
-    byte[] mybytearray = new byte[1024];
-    InputStream is = sock.getInputStream();
-    FileOutputStream fos = new FileOutputStream("s.pdf");
-    BufferedOutputStream bos = new BufferedOutputStream(fos);
-
-	// establish a connection, recieve user input then send output to socket
-    int bytesRead = is.read(mybytearray, 0, mybytearray.length);
-    bos.write(mybytearray, 0, bytesRead);
-
-    // closing of sockets & streams
-    bos.close();
-    sock.close();
-  }
-}
-*/

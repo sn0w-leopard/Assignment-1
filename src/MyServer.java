@@ -12,6 +12,14 @@ import java.io.*;
 import java.util.*; 
 import java.net.*; 
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.Scanner;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 // Server class 
 public class MyServer 
 { 
@@ -24,47 +32,76 @@ public class MyServer
 	
 
 	public static void main(String[] args) throws IOException 
-	{ 
-		
-		ServerSocket sServer = new ServerSocket(1001); 		
-		Socket s; 
+	{
+		File myFile = new File ("./files/test.html");
+		ServerSocket sServer = new ServerSocket(6969); 		
 
-		FileInputStream fileIS = new FileInputStream("./files/index.html");
-		byte b[] = new byte [9999];
-		fileIS.read(b, 0, b.length);
-		OutputStream fileOS = s.getOutputStream();
-		fileOS.write(b, 0, b.length);
-		
-		// infinite loop to catch new clients 
-		while (true) 
-		{ 
-	
+		//Download from server
+		while (true)
+		{
+			System.out.println(getList("./files"));
+			Socket s;
 			s = sServer.accept();
-			System.out.println("...Incoming client request... "); 
-			System.out.println(s); 
-			
-			//input and output streams 
-			DataInputStream inStream = new DataInputStream(s.getInputStream()); 
-			DataOutputStream outStream = new DataOutputStream(s.getOutputStream());
-			
-			
-			// Create a new handler object and corrosponding thread			
-			System.out.println("...Creating new handler, please wait..."); 
-			ClientController cController = new ClientController(s,"client " + count, inStream, outStream); 
-			Thread t = new Thread(cController);
-						
 
-			// add this client to active clients list
-			activeClients.add(cController);  			
-			System.out.println("Client successfully added list"); 
+			BufferedInputStream fileIS = new BufferedInputStream(new FileInputStream(myFile));
+			byte b[] = new byte[(int) myFile.length()];
+			fileIS.read(b, 0, b.length);
 
+			OutputStream fileOS = s.getOutputStream();
 
-			//Start thread and inc counter
-			t.start(); 
-			count++; 
+			fileOS.write(b, 0, b.length);
+			fileOS.flush();
+			System.out.println("copy complete: " + b.length);
 
+			fileOS.close();
+		}
+
+		/*
+		 * // infinite loop to catch new clients while (true) {
+		 * 
+		 * s = sServer.accept(); System.out.println("...Incoming client request... ");
+		 * System.out.println(s);
+		 * 
+		 * //input and output streams DataInputStream inStream = new
+		 * DataInputStream(s.getInputStream()); DataOutputStream outStream = new
+		 * DataOutputStream(s.getOutputStream());
+		 * 
+		 * 
+		 * // Create a new handler object and corrosponding thread
+		 * System.out.println("...Creating new handler, please wait...");
+		 * ClientController cController = new ClientController(s,"client " + count,
+		 * inStream, outStream); Thread t = new Thread(cController);
+		 * 
+		 * 
+		 * // add this client to active clients list activeClients.add(cController);
+		 * System.out.println("Client successfully added list");
+		 * 
+		 * 
+		 * //Start thread and inc counter t.start(); count++;
+		 * 
+		 * }
+		 */
+	}
+
+	static String getList(String dest)
+	{
+		//returns list of files in selected dir
+		try (Stream<Path> walk = Files.walk(Paths.get(dest))) 
+		{
+
+			List<String> result = walk.filter(Files::isRegularFile).map(x -> x.toString()).collect(Collectors.toList());
+	
+			//result.forEach(System.out::println);
+			return result.toString();
+	
 		} 
-	} 
+		catch (IOException e) 
+		{
+			e.printStackTrace();
+		}
+		return "404";
+	}
+	 
 } 
 
 // ClientController class 
