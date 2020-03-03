@@ -31,86 +31,50 @@ public class MyClient
 		DataInputStream inStream = new DataInputStream(s.getInputStream()); 
 		DataOutputStream outStream = new DataOutputStream(s.getOutputStream());
 
+		downloadFile(s, "success.html");
+
+		/*
+		 * // sendMessage thread Thread sendMessage = new Thread(new Runnable() {
+		 * 
+		 * @Override public void run() { while (true) {
+		 * 
+		 * // read the message to deliver. String msg = scn.nextLine();
+		 * 
+		 * try { // write on the output stream outStream.writeUTF(msg); } catch
+		 * (IOException e) { e.printStackTrace(); } } } });
+		 * 
+		 * // readMessage thread Thread readMessage = new Thread(new Runnable() {
+		 * 
+		 * @Override public void run() {
+		 * 
+		 * while (true) { try { // read the message sent to this client String msg =
+		 * inStream.readUTF(); System.out.println(msg); } catch (IOException e) {
+		 * 
+		 * e.printStackTrace(); } } } });
+		 */
+
+
+		// sendMessage.start();
+		// readMessage.start();
+		// readFile.start();
+
+	}
+
+	static void downloadFile(Socket s, String file)  throws UnknownHostException, IOException
+	{
 		//File transfer streams
 		byte[] b = new byte[9999999];
 		InputStream is = s.getInputStream();
-		FileOutputStream fr = new FileOutputStream("./success.html");
+		FileOutputStream fr = new FileOutputStream(file);
 		BufferedOutputStream bos = new BufferedOutputStream(fr);
+		// read downloaded file
 		int bytesRead = is.read(b, 0, b.length);
 		System.out.println("recieve complete: " + b.length);
 
 		bos.write(b, 0, bytesRead);
 		System.out.println("write complete: " + bytesRead);
-
 		bos.close();
-		s.close();
 
-		
-
-/* 
-		// sendMessage thread 
-		Thread sendMessage = new Thread(new Runnable() 
-		{ 
-			@Override
-			public void run() { 
-				while (true) { 
-
-					// read the message to deliver. 
-					String msg = scn.nextLine(); 
-					
-					try { 
-						// write on the output stream 
-						outStream.writeUTF(msg); 
-					} catch (IOException e) { 
-						e.printStackTrace(); 
-					} 
-				} 
-			} 
-		}); 
-		
-		// readMessage thread 
-		Thread readMessage = new Thread(new Runnable() 
-		{ 
-			@Override
-			public void run() { 
-
-				while (true) { 
-					try { 
-						// read the message sent to this client 
-						String msg = inStream.readUTF(); 
-						System.out.println(msg); 
-					} catch (IOException e) { 
-
-						e.printStackTrace(); 
-					} 
-				} 
-			} 
-		}); 
-
-		// readFile thread 
-		Thread readFile = new Thread(new Runnable() 
-		{ 
-			@Override
-			public void run() { 
-
-				while (true) { 
-					try { 
-						// read the message sent to this client 
-						int bSize = is.read(b,0,b.length);
-						fr.write(b,0,bSize); 
-						System.out.println("Copy Complete"); 
-					} catch (IOException e) { 
-
-						e.printStackTrace(); 
-					} 
-				} 
-			} 
-		}); 
-
-		sendMessage.start(); 
-		readMessage.start(); 
-		readFile.start();
- */
 	} 
 } 
 
