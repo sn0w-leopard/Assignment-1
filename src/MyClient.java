@@ -32,31 +32,69 @@ public class MyClient
 		DataOutputStream outStream = new DataOutputStream(s.getOutputStream());
 
 		downloadFile(s, "success.html");
+		
+		downloadFile(s, "success.html");
 
-		/*
-		 * // sendMessage thread Thread sendMessage = new Thread(new Runnable() {
-		 * 
-		 * @Override public void run() { while (true) {
-		 * 
-		 * // read the message to deliver. String msg = scn.nextLine();
-		 * 
-		 * try { // write on the output stream outStream.writeUTF(msg); } catch
-		 * (IOException e) { e.printStackTrace(); } } } });
-		 * 
-		 * // readMessage thread Thread readMessage = new Thread(new Runnable() {
-		 * 
-		 * @Override public void run() {
-		 * 
-		 * while (true) { try { // read the message sent to this client String msg =
-		 * inStream.readUTF(); System.out.println(msg); } catch (IOException e) {
-		 * 
-		 * e.printStackTrace(); } } } });
-		 */
+		
+		// sendMessage thread 
+		Thread sendMessage = new Thread(new Runnable() 
+		{
+			@Override 
+			public void run() 
+				{
+					while (true) 
+					{
+					// read the message to deliver. 
+					String msg = scn.nextLine();
+					try
+						{ 
+						// write on the output stream
+						outStream.writeUTF(msg); 
+					} 
+						catch(IOException e) { 
+						e.printStackTrace(); 
+					} 
+				} 
+			} 
+		});
+
+		// readMessage thread 
+		Thread readMessage = new Thread(new Runnable() 
+		{
+			@Override 
+			public void run() 
+				{
+					while (true) 
+					{
+					// read the message to deliver. 
+					String msg = scn.nextLine();
+					try
+						{ 
+						// write on the output stream
+						outStream.writeUTF(msg); 
+					} 
+						catch(IOException e) { 
+						e.printStackTrace(); 
+					} 
+				} 
+			} 
+		});
+
+		// readMessage thread
+
+
+		@Override public void run() {
+
+		while (true) { try { // read the message sent to this client
+			 String msg = inStream.readUTF();
+			  System.out.println(msg); } catch (IOException e) {
+		
+		e.printStackTrace(); } } } });
+		
 
 
 		// sendMessage.start();
 		// readMessage.start();
-		// readFile.start();
 
 	}
 
@@ -69,12 +107,29 @@ public class MyClient
 		BufferedOutputStream bos = new BufferedOutputStream(fr);
 		// read downloaded file
 		int bytesRead = is.read(b, 0, b.length);
-		System.out.println("recieve complete: " + b.length);
 
 		bos.write(b, 0, bytesRead);
-		System.out.println("write complete: " + bytesRead);
+		System.out.println("download complete: " + bytesRead);
 		bos.close();
 
+	}	
+	
+	static void uploadFile(Socket s, String file)  throws UnknownHostException, IOException
+	{
+		//File transfer streams
+		File myFile = new File (file);
+
+		BufferedInputStream fileIS = new BufferedInputStream(new FileInputStream(myFile));
+		byte b[] = new byte[(int) myFile.length()];
+		fileIS.read(b, 0, b.length);
+
+		OutputStream fileOS = s.getOutputStream();
+
+		fileOS.write(b, 0, b.length);
+		fileOS.flush();
+		System.out.println("upload complete: " + b.length);
+
+		fileOS.close();
 	} 
 } 
 

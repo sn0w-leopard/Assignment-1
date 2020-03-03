@@ -39,7 +39,7 @@ public class MyServer
 		//Download from server
 		while (true)
 		{
-			System.out.println(getList("./files"));
+			//System.out.println(getList("./files"));
 			Socket s;
 			s = sServer.accept();
 
@@ -83,24 +83,7 @@ public class MyServer
 		 */
 	}
 
-	static String getList(String dest)
-	{
-		//returns list of files in selected dir
-		try (Stream<Path> walk = Files.walk(Paths.get(dest))) 
-		{
 
-			List<String> result = walk.filter(Files::isRegularFile).map(x -> x.toString()).collect(Collectors.toList());
-	
-			//result.forEach(System.out::println);
-			return result.toString();
-	
-		} 
-		catch (IOException e) 
-		{
-			e.printStackTrace();
-		}
-		return "404";
-	}
 	 
 } 
 
@@ -126,9 +109,66 @@ class ClientController implements Runnable
 		this.isloggedin=true; 
 	} 
 
-    void files() {
+	String getList(String dest)
+	{
+		//returns list of files in selected dir
+		try (Stream<Path> walk = Files.walk(Paths.get(dest))) 
+		{
 
+			List<String> result = walk.filter(Files::isRegularFile).map(x -> x.toString()).collect(Collectors.toList());
+	
+			//result.forEach(System.out::println);
+			return result.toString();
+	
+		} 
+		catch (IOException e) 
+		{
+			e.printStackTrace();
+		}
+		return "404";
 	}
+
+	void downloadFile(Socket s, String file)  throws UnknownHostException, IOException
+	{
+		//User request to download file
+		File myFile = new File ("./files/test.html");	
+
+		//Download from server
+		while (true)
+		{
+
+			BufferedInputStream fileIS = new BufferedInputStream(new FileInputStream(myFile));
+			byte b[] = new byte[(int) myFile.length()];
+			fileIS.read(b, 0, b.length);
+
+			OutputStream fileOS = s.getOutputStream();
+
+			fileOS.write(b, 0, b.length);
+			fileOS.flush();
+			System.out.println(" download complete: " + b.length);
+
+			fileOS.close();
+		}
+
+	}	
+	
+	void uploadFile(Socket s, String file)  throws UnknownHostException, IOException
+	{
+		//File transfer streams
+		File myFile = new File (file);
+
+		BufferedInputStream fileIS = new BufferedInputStream(new FileInputStream(myFile));
+		byte b[] = new byte[(int) myFile.length()];
+		fileIS.read(b, 0, b.length);
+
+		OutputStream fileOS = s.getOutputStream();
+
+		fileOS.write(b, 0, b.length);
+		fileOS.flush();
+		System.out.println("upload complete: " + b.length);
+
+		fileOS.close();
+	} 
 	
 	@Override
 	public void run() { 
@@ -154,9 +194,18 @@ class ClientController implements Runnable
 				//File Query
 				if(sReceived.equals("!files"))
 				{ 
-					files();
+					getList("./files");
 					continue; 
-				}  
+				}
+				
+				// File Download
+				if(sReceived.equals("!download"))
+				{ 
+					downloadFile(s, "abc");
+					continue; 
+				}
+
+
 				
 				// String Parsing (seperating message and recipient)
 				StringTokenizer sToken = new StringTokenizer(sReceived, "#"); 
