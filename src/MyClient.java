@@ -7,8 +7,6 @@ Client Side Services
 Establishes connection to server, sends & recieve messages (seperate threads for each act)
 */
 
-package src;
-
 import java.io.*; 
 import java.net.*; 
 import java.util.Scanner; 

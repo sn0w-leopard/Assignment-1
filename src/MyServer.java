@@ -8,8 +8,6 @@ Server runs an infinite loop to accept incoming requests assigning a new thread 
 Server also stores client name and corresponding thread object to keep track of connected devices.
  */
 
-package src;
-
 import java.io.*; 
 import java.util.*; 
 import java.net.*; 
