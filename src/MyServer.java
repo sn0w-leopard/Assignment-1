@@ -34,13 +34,14 @@ public class MyServer
 	public static void main(String[] args) throws IOException 
 	{
 		File myFile = new File ("./files/test.html");
-		ServerSocket sServer = new ServerSocket(6969); 		
+		ServerSocket sServer = new ServerSocket(6969);
+		Socket s;	
 
 		//Download from server
-		while (true)
-		{
+		//while (true)
+		//{
 			System.out.println(getList("./files"));
-			Socket s;
+			
 			s = sServer.accept();
 
 			BufferedInputStream fileIS = new BufferedInputStream(new FileInputStream(myFile));
@@ -54,33 +55,34 @@ public class MyServer
 			System.out.println("copy complete: " + b.length);
 
 			fileOS.close();
-		}
+		//}
 
-		/*
-		 * // infinite loop to catch new clients while (true) {
-		 * 
-		 * s = sServer.accept(); System.out.println("...Incoming client request... ");
-		 * System.out.println(s);
-		 * 
-		 * //input and output streams DataInputStream inStream = new
-		 * DataInputStream(s.getInputStream()); DataOutputStream outStream = new
-		 * DataOutputStream(s.getOutputStream());
-		 * 
-		 * 
-		 * // Create a new handler object and corrosponding thread
-		 * System.out.println("...Creating new handler, please wait...");
-		 * ClientController cController = new ClientController(s,"client " + count,
-		 * inStream, outStream); Thread t = new Thread(cController);
-		 * 
-		 * 
-		 * // add this client to active clients list activeClients.add(cController);
-		 * System.out.println("Client successfully added list");
-		 * 
-		 * 
-		 * //Start thread and inc counter t.start(); count++;
-		 * 
-		 * }
-		 */
+		
+		// infinite loop to catch new clients
+		while (true)
+		{
+			s = sServer.accept();
+			System.out.println("...Incoming client request... ");
+			System.out.println(s);
+		
+			//input and output streams
+			DataInputStream inStream = new DataInputStream(s.getInputStream());
+			DataOutputStream outStream = new DataOutputStream(s.getOutputStream());
+
+			// Create a new handler object and corrosponding thread
+			System.out.println("...Creating new handler, please wait...");
+			ClientController cController = new ClientController(s,"client " + count, inStream, outStream);
+			Thread t = new Thread(cController);
+		
+			// add this client to active clients list
+			activeClients.add(cController);
+			System.out.println("Client successfully added list");
+		 
+			//Start thread and inc counter
+			t.start();
+			count++;
+		}
+		//sServer.close();
 	}
 
 	static String getList(String dest)
@@ -146,6 +148,7 @@ class ClientController implements Runnable
 				//Logout
 				if(sReceived.equals("!exit"))
 				{ 
+					System.out.println("test if reaches this"); // trace statement to see if client commands are reaching server side
 					this.isloggedin=false; 
 					this.s.close(); 
 					break; 
