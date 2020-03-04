@@ -8,6 +8,7 @@ Establishes connection to server, sends & recieve messages (seperate threads for
 */
 
 import java.io.*;
+import java.io.EOFException;
 import java.net.*;
 import java.util.Scanner;
 
@@ -25,82 +26,71 @@ public class MyClient
 		InetAddress ip = InetAddress.getByName("localhost"); 
 		
 		// establish the connection 
-		Socket s = new Socket(ip, ServerPort); 
-		
-		//input and out streams 
-		DataInputStream inStream = new DataInputStream(s.getInputStream()); 
-		DataOutputStream outStream = new DataOutputStream(s.getOutputStream());
+		try {
+			Socket s = new Socket(ip, ServerPort);
 
-		downloadFile(s, "success.html");
-		
-		downloadFile(s, "success.html");
+			System.out.println("Successfully connected to server at " + ip + " on port " + ServerPort);
+			System.out.println("To interact with server:\n!upload - to upload a file to the server\n!files - to query the server for its list of available files\n!name_of_file - to download one of the listed files from the server\n!exit - to exit\n\n");
 
-		
-		// sendMessage thread 
-		Thread sendMessage = new Thread(new Runnable() 
-		{
-			@Override 
-			public void run() 
-				{
-					while (true) 
-					{
-					// read the message to deliver. 
-					String msg = scn.nextLine();
-					try
-						{ 
-						// write on the output stream
-						outStream.writeUTF(msg); 
-					} 
-						catch(IOException e) { 
-						e.printStackTrace(); 
-					} 
-				} 
-			} 
-		});
+			// input and out streams
+			DataInputStream inStream = new DataInputStream(s.getInputStream());
+			DataOutputStream outStream = new DataOutputStream(s.getOutputStream());
 
-		// readMessage thread 
-		Thread readMessage = new Thread(new Runnable() 
-		{
-			@Override 
-			public void run() 
-				{
-					while (true) 
-					{
-					// read the message to deliver. 
-					String msg = scn.nextLine();
-					try
-						{ 
-						// write on the output stream
-						outStream.writeUTF(msg); 
-					} 
-						catch(IOException e) { 
-						e.printStackTrace(); 
-					} 
-				} 
-			} 
-		});
+			// sendMessage thread
+			Thread sendMessage = new Thread(new Runnable() {
+				@Override
+				public void run() {
+					while (true) {
 
-		// readMessage thread
+						// read the message to deliver.
+						String msg = scn.nextLine();
 
+						try {
+							// write on the output stream
+							outStream.writeUTF(msg);
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					}
+				}
+			});
 
-		@Override public void run() {
+			//commented out this block, changed very little but readUTF kept throwing errors (assume because initially when thread created there is  no input stream so kept returning null, not sure how to handle this)
+			// readMessage thread
+			Thread readMessage = new Thread(new Runnable() {
+				@Override
+				public void run() {
+					while (true) {
 
-		while (true) { try { // read the message sent to this client
-			 String msg = inStream.readUTF();
-			  System.out.println(msg); } catch (IOException e) {
-		
-		e.printStackTrace(); } } } });
-		
+						try {
+							// read the message sent to this client
+							String msg = inStream.readUTF(); // this was producing errors
+							System.out.println(msg);
+						}
+/* 						 catch (EOFException ex) {
+							run();
+						}  */
+						catch (IOException e) {
+							e.printStackTrace();
+						}
+					}
+				}
+			}); 
 
+			sendMessage.start();
+			readMessage.start();
+			// readFile.start();
 
-		// sendMessage.start();
-		// readMessage.start();
-
+		} catch (UnknownHostException ex) {
+			System.out.println("Server not found: " + ex.getMessage());
+		} catch (IOException ex) {
+			System.out.println("I/O Error: " + ex.getMessage());
+		}
 	}
 
 	static void downloadFile(Socket s, String file)  throws UnknownHostException, IOException
 	{
-		//File transfer streams
+		//Download file from server
 		byte[] b = new byte[9999999];
 		InputStream is = s.getInputStream();
 		FileOutputStream fr = new FileOutputStream(file);
@@ -116,7 +106,7 @@ public class MyClient
 	
 	static void uploadFile(Socket s, String file)  throws UnknownHostException, IOException
 	{
-		//File transfer streams
+		//input is file to be uploaded
 		File myFile = new File (file);
 
 		BufferedInputStream fileIS = new BufferedInputStream(new FileInputStream(myFile));

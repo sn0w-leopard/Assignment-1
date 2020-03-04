@@ -34,57 +34,39 @@ public class MyServer
 	public static void main(String[] args) throws IOException 
 	{
 		File myFile = new File ("./files/test.html");
-		ServerSocket sServer = new ServerSocket(6969); 		
 
-		//Download from server
+		Socket s;			
+		ServerSocket sServer = new ServerSocket(6969);
+		s = sServer.accept();
+		System.out.println("...Server Online... ");
+
+
+		
+		// infinite loop to catch new clients
 		while (true)
 		{
-			//System.out.println(getList("./files"));
-			Socket s;
 			s = sServer.accept();
+			System.out.println("...Incoming client request... ");
+			System.out.println(s);
+		
+			//input and output streams
+			DataInputStream inStream = new DataInputStream(s.getInputStream());
+			DataOutputStream outStream = new DataOutputStream(s.getOutputStream());
 
-			BufferedInputStream fileIS = new BufferedInputStream(new FileInputStream(myFile));
-			byte b[] = new byte[(int) myFile.length()];
-			fileIS.read(b, 0, b.length);
-
-			OutputStream fileOS = s.getOutputStream();
-
-			fileOS.write(b, 0, b.length);
-			fileOS.flush();
-			System.out.println("copy complete: " + b.length);
-
-			fileOS.close();
+			// Create a new handler object and corrosponding thread
+			System.out.println("...Creating new handler, please wait...");
+			ClientController cController = new ClientController(s,"client " + count, inStream, outStream);
+			Thread t = new Thread(cController);
+		
+			// add this client to active clients list
+			activeClients.add(cController);
+			System.out.println("Client successfully added list");
+		 
+			//Start thread and inc counter
+			t.start();
+			count++;
 		}
-
-		/*
-		 * // infinite loop to catch new clients while (true) {
-		 * 
-		 * s = sServer.accept(); System.out.println("...Incoming client request... ");
-		 * System.out.println(s);
-		 * 
-		 * //input and output streams DataInputStream inStream = new
-		 * DataInputStream(s.getInputStream()); DataOutputStream outStream = new
-		 * DataOutputStream(s.getOutputStream());
-		 * 
-		 * 
-		 * // Create a new handler object and corrosponding thread
-		 * System.out.println("...Creating new handler, please wait...");
-		 * ClientController cController = new ClientController(s,"client " + count,
-		 * inStream, outStream); Thread t = new Thread(cController);
-		 * 
-		 * 
-		 * // add this client to active clients list activeClients.add(cController);
-		 * System.out.println("Client successfully added list");
-		 * 
-		 * 
-		 * //Start thread and inc counter t.start(); count++;
-		 * 
-		 * }
-		 */
-	}
-
-
-	 
+	} 
 } 
 
 // ClientController class 
@@ -128,7 +110,7 @@ class ClientController implements Runnable
 		return "404";
 	}
 
-	void downloadFile(Socket s, String file)  throws UnknownHostException, IOException
+	void downloadFile(Socket s, String file)  throws IOException
 	{
 		//User request to download file
 		File myFile = new File ("./files/test.html");	
@@ -152,7 +134,7 @@ class ClientController implements Runnable
 
 	}	
 	
-	void uploadFile(Socket s, String file)  throws UnknownHostException, IOException
+/* 	void uploadFile(Socket s, String file)  throws IOException
 	{
 		//File transfer streams
 		File myFile = new File (file);
@@ -168,12 +150,12 @@ class ClientController implements Runnable
 		System.out.println("upload complete: " + b.length);
 
 		fileOS.close();
-	} 
+	}  */
 	
 	@Override
 	public void run() { 
 
-		//recieving and parsing of string, loging out if "!exit" command recieved
+		//recieving and parsing of string input
 		String sReceived; 
 		while (true) 
 		{ 
@@ -184,10 +166,11 @@ class ClientController implements Runnable
 				System.out.println(sReceived); 
 				
 				//Logout
-				if(sReceived.equals("!exit"))
+				if(sReceived.equals("exit"))
 				{ 
+					System.out.println("test if reaches this"); // trace statement to see if client commands are reaching server side
 					this.isloggedin=false; 
-					this.s.close(); 
+					//this.s.close(); 
 					break; 
 				}
 
@@ -195,14 +178,14 @@ class ClientController implements Runnable
 				if(sReceived.equals("!files"))
 				{ 
 					getList("./files");
-					continue; 
+					break; 
 				}
 				
 				// File Download
-				if(sReceived.equals("!download"))
+				if(sReceived.equals("!down"))
 				{ 
-					downloadFile(s, "abc");
-					continue; 
+					downloadFile(s, "doesnt matter atm");
+					break; 
 				}
 
 
@@ -237,7 +220,8 @@ class ClientController implements Runnable
 			e.printStackTrace(); 
 		} 
 	} 
-} 
+}
+
 
 
 
