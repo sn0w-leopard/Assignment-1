@@ -123,7 +123,7 @@ class ClientController implements Runnable {
 	void downloadFile(Socket s, String file)  throws IOException
 	{
 		//User request to download file
-		File myFile = new File ("./files/test.html");	
+		File myFile = new File ("../src/files/test.html");	
 
 		//Download from server
 		while (true)
@@ -187,7 +187,7 @@ class ClientController implements Runnable {
 				//File Query
 				else if(sReceived.equals("!files"))
 				{ 
-					String temp = getList("./files");
+					String temp = getList("../src/files");
 					this.outStream.writeUTF(temp);
 					break; 
 				}
