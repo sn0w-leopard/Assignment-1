@@ -34,10 +34,9 @@ public class MyServer
 	public static void main(String[] args) throws IOException 
 	{
 		File myFile = new File ("./files/test.html");
-
-		Socket s;			
+			
 		ServerSocket sServer = new ServerSocket(6969);
-		//s = sServer.accept();
+		Socket s;
 		System.out.println("...Server Online... ");
 
 
@@ -72,7 +71,7 @@ public class MyServer
 // ClientController class 
 // Thread class extention to be instantiated each time a request comes to allow multiple threads
 // Breaks up message into "message" & "recipient" parts and handles accordingly
-class ClientController implements Runnable 
+class ClientController implements Runnable
 {
 	//Variable Declarations
 	Scanner scn = new Scanner(System.in); 
@@ -82,6 +81,7 @@ class ClientController implements Runnable
 	Socket s; 
 	boolean isloggedin; 
 	
+	// Constructor
 	public ClientController(Socket s, String name, DataInputStream inStream, DataOutputStream outStream) 
 	{ 
 		this.inStream = inStream; 
@@ -99,7 +99,7 @@ class ClientController implements Runnable
 
 			List<String> result = walk.filter(Files::isRegularFile).map(x -> x.toString()).collect(Collectors.toList());
 	
-			//result.forEach(System.out::println);
+			result.forEach(System.out::println);
 			return result.toString();
 	
 		} 
@@ -129,7 +129,7 @@ class ClientController implements Runnable
 			fileOS.flush();
 			System.out.println(" download complete: " + b.length);
 
-			fileOS.close();
+			//fileOS.close();
 		}
 
 	}	
@@ -177,7 +177,8 @@ class ClientController implements Runnable
 				//File Query
 				else if(sReceived.equals("!files"))
 				{ 
-					getList("./files");
+					String temp = getList("./files");
+					this.outStream.writeUTF(temp);
 					break; 
 				}
 				
@@ -226,7 +227,7 @@ class ClientController implements Runnable
 		} 
 		try
 		{ 
-			// leaky taps
+			// closing data leaks
 			this.inStream.close(); 
 			this.outStream.close(); 
 			
