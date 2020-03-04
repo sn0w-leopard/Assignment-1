@@ -36,8 +36,6 @@ public class MyClient
 			DataInputStream inStream = new DataInputStream(s.getInputStream());
 			DataOutputStream outStream = new DataOutputStream(s.getOutputStream());
 
-			downloadFile(s, "success.html");
-
 			// sendMessage thread
 			Thread sendMessage = new Thread(new Runnable() {
 				@Override
@@ -59,26 +57,28 @@ public class MyClient
 
 			//commented out this block, changed very little but readUTF kept throwing errors (assume because initially when thread created there is  no input stream so kept returning null, not sure how to handle this)
 			// readMessage thread
-			/* Thread readMessage = new Thread(new Runnable() {
+			Thread readMessage = new Thread(new Runnable() {
 				@Override
 				public void run() {
-					String msg = "test";
-					while (msg!=null) {
+					while (true) {
+
 						try {
 							// read the message sent to this client
-							msg = inStream.readUTF(); // this was producing errors
+							String msg = inStream.readUTF(); // this was producing errors
 							System.out.println(msg);
-						} catch (EOFException ex) {
+						}
+/* 						 catch (EOFException ex) {
 							run();
-						} catch (IOException e) {
+						}  */
+						catch (IOException e) {
 							e.printStackTrace();
 						}
 					}
 				}
-			}); */
+			}); 
 
 			sendMessage.start();
-			//readMessage.start();
+			readMessage.start();
 			// readFile.start();
 
 		} catch (UnknownHostException ex) {
@@ -90,19 +90,36 @@ public class MyClient
 
 	static void downloadFile(Socket s, String file)  throws UnknownHostException, IOException
 	{
-		//File transfer streams
+		//Download file from server
 		byte[] b = new byte[9999999];
 		InputStream is = s.getInputStream();
 		FileOutputStream fr = new FileOutputStream(file);
 		BufferedOutputStream bos = new BufferedOutputStream(fr);
 		// read downloaded file
 		int bytesRead = is.read(b, 0, b.length);
-		System.out.println("recieve complete: " + b.length);
 
 		bos.write(b, 0, bytesRead);
-		System.out.println("write complete: " + bytesRead);
+		System.out.println("download complete: " + bytesRead);
 		bos.close();
 
+	}	
+	
+	static void uploadFile(Socket s, String file)  throws UnknownHostException, IOException
+	{
+		//input is file to be uploaded
+		File myFile = new File (file);
+
+		BufferedInputStream fileIS = new BufferedInputStream(new FileInputStream(myFile));
+		byte b[] = new byte[(int) myFile.length()];
+		fileIS.read(b, 0, b.length);
+
+		OutputStream fileOS = s.getOutputStream();
+
+		fileOS.write(b, 0, b.length);
+		fileOS.flush();
+		System.out.println("upload complete: " + b.length);
+
+		fileOS.close();
 	} 
 } 
 

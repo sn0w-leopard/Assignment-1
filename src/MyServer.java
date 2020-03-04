@@ -34,28 +34,12 @@ public class MyServer
 	public static void main(String[] args) throws IOException 
 	{
 		File myFile = new File ("./files/test.html");
+
+		Socket s;			
 		ServerSocket sServer = new ServerSocket(6969);
-		Socket s;	
+		s = sServer.accept();
+		System.out.println("...Server Online... ");
 
-		//Download from server
-		//while (true)
-		//{
-			System.out.println(getList("./files"));
-			
-			s = sServer.accept();
-
-			BufferedInputStream fileIS = new BufferedInputStream(new FileInputStream(myFile));
-			byte b[] = new byte[(int) myFile.length()];
-			fileIS.read(b, 0, b.length);
-
-			OutputStream fileOS = s.getOutputStream();
-
-			fileOS.write(b, 0, b.length);
-			fileOS.flush();
-			System.out.println("copy complete: " + b.length);
-
-			fileOS.close();
-		//}
 
 		
 		// infinite loop to catch new clients
@@ -82,28 +66,7 @@ public class MyServer
 			t.start();
 			count++;
 		}
-		//sServer.close();
-	}
-
-	static String getList(String dest)
-	{
-		//returns list of files in selected dir
-		try (Stream<Path> walk = Files.walk(Paths.get(dest))) 
-		{
-
-			List<String> result = walk.filter(Files::isRegularFile).map(x -> x.toString()).collect(Collectors.toList());
-	
-			//result.forEach(System.out::println);
-			return result.toString();
-	
-		} 
-		catch (IOException e) 
-		{
-			e.printStackTrace();
-		}
-		return "404";
-	}
-	 
+	} 
 } 
 
 // ClientController class 
@@ -128,14 +91,71 @@ class ClientController implements Runnable
 		this.isloggedin=true; 
 	} 
 
-    void files() {
+	String getList(String dest)
+	{
+		//returns list of files in selected dir
+		try (Stream<Path> walk = Files.walk(Paths.get(dest))) 
+		{
 
+			List<String> result = walk.filter(Files::isRegularFile).map(x -> x.toString()).collect(Collectors.toList());
+	
+			//result.forEach(System.out::println);
+			return result.toString();
+	
+		} 
+		catch (IOException e) 
+		{
+			e.printStackTrace();
+		}
+		return "404";
 	}
+
+	void downloadFile(Socket s, String file)  throws IOException
+	{
+		//User request to download file
+		File myFile = new File ("./files/test.html");	
+
+		//Download from server
+		while (true)
+		{
+
+			BufferedInputStream fileIS = new BufferedInputStream(new FileInputStream(myFile));
+			byte b[] = new byte[(int) myFile.length()];
+			fileIS.read(b, 0, b.length);
+
+			OutputStream fileOS = s.getOutputStream();
+
+			fileOS.write(b, 0, b.length);
+			fileOS.flush();
+			System.out.println(" download complete: " + b.length);
+
+			fileOS.close();
+		}
+
+	}	
+	
+/* 	void uploadFile(Socket s, String file)  throws IOException
+	{
+		//File transfer streams
+		File myFile = new File (file);
+
+		BufferedInputStream fileIS = new BufferedInputStream(new FileInputStream(myFile));
+		byte b[] = new byte[(int) myFile.length()];
+		fileIS.read(b, 0, b.length);
+
+		OutputStream fileOS = s.getOutputStream();
+
+		fileOS.write(b, 0, b.length);
+		fileOS.flush();
+		System.out.println("upload complete: " + b.length);
+
+		fileOS.close();
+	}  */
 	
 	@Override
 	public void run() { 
 
-		//recieving and parsing of string, loging out if "!exit" command recieved
+		//recieving and parsing of string input
 		String sReceived; 
 		while (true) 
 		{ 
@@ -146,20 +166,29 @@ class ClientController implements Runnable
 				System.out.println(sReceived); 
 				
 				//Logout
-				if(sReceived.equals("!exit"))
+				if(sReceived.equals("exit"))
 				{ 
 					System.out.println("test if reaches this"); // trace statement to see if client commands are reaching server side
 					this.isloggedin=false; 
-					this.s.close(); 
+					//this.s.close(); 
 					break; 
 				}
 
 				//File Query
 				if(sReceived.equals("!files"))
 				{ 
-					files();
-					continue; 
-				}  
+					getList("./files");
+					break; 
+				}
+				
+				// File Download
+				if(sReceived.equals("!down"))
+				{ 
+					downloadFile(s, "doesnt matter atm");
+					break; 
+				}
+
+
 				
 				// String Parsing (seperating message and recipient)
 				StringTokenizer sToken = new StringTokenizer(sReceived, "#"); 
@@ -191,7 +220,8 @@ class ClientController implements Runnable
 			e.printStackTrace(); 
 		} 
 	} 
-} 
+}
+
 
 
 
