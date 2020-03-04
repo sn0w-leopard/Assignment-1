@@ -37,7 +37,7 @@ public class MyServer
 
 		Socket s;			
 		ServerSocket sServer = new ServerSocket(6969);
-		s = sServer.accept();
+		//s = sServer.accept();
 		System.out.println("...Server Online... ");
 
 
