@@ -170,7 +170,7 @@ class ClientController implements Runnable
 				{ 
 					System.out.println("test if reaches this"); // trace statement to see if client commands are reaching server side
 					this.isloggedin=false; 
-					//this.s.close(); 
+					this.s.close(); 
 					break; 
 				}
 
