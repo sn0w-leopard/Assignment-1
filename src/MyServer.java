@@ -22,24 +22,20 @@ import java.util.stream.Stream;
 public class MyServer {
 
 	// Active cClients Storage & Count
-	Vector<ClientController> activeClients = new Vector<>();
-	int count = 0;
+	static Vector<ClientController> activeClients = new Vector<>();
+	static int count = 0;
 
 	Vector<String> fileList = new Vector<>();
 
-	Vector<ClientController> getClients() 
-	{
-		//returns vector of all active clients
-        return activeClients;
+	Vector<ClientController> getClients() {
+		// returns vector of all active clients
+		return activeClients;
 	}
-	
 
-	boolean onlineStatus() 
-		{
-			//check to see if there are any active clients on server
-			return !this.activeClients.isEmpty();
-		}
-
+	boolean onlineStatus() {
+		// check to see if there are any active clients on server
+		return !MyServer.activeClients.isEmpty();
+	}
 
 	public static void main(String[] args) throws IOException {
 		File myFile = new File("./files/test.html");
