@@ -108,12 +108,12 @@ class ClientController implements Runnable {
 		return "404";
 	}
 
-	void currentUsers() {
-		if (MyServer.onlineStatus())
-			{
-
-			}
-	}
+	//void currentUsers() {
+	//	if (MyServer.onlineStatus())
+	//		{
+	
+	//		}
+	//}
 
 
 	void downloadFile(Socket s, String file)  throws IOException
@@ -195,6 +195,18 @@ class ClientController implements Runnable {
 					break; 
 				}
 
+				// broadcast to all clients
+				else if (sReceived.length() >= 10 && sReceived.substring(0, 10).equals("!broadcast"))
+				{
+					System.out.println("here");
+					String broadcast = sReceived.substring(10);
+
+					for (ClientController tempClient : MyServer.activeClients)
+					{
+						tempClient.outStream.writeUTF(this.name + " : " + broadcast);
+					}
+				}
+
 
 				
 				// String Parsing (seperating message and recipient)
@@ -218,7 +230,7 @@ class ClientController implements Runnable {
 					}
 				}
 				else {
-					this.outStream.writeUTF("Please Enter Valid Input");
+					this.outStream.writeUTF("Please Enter Valid Input"); // after this no commands work, think because we not going line by line and instead going by stream
 					break;
 					//String recipient = sToken.nextToken();
 

@@ -30,7 +30,7 @@ public class MyClient
 			Socket s = new Socket(ip, ServerPort);
 
 			System.out.println("Successfully connected to server at " + ip + " on port " + ServerPort);
-			System.out.println("To interact with server:\n!upload - to upload a file to the server\n!files - to query the server for its list of available files\n!name_of_file - to download one of the listed files from the server\n!exit - to exit\n\n");
+			System.out.println("To interact with server:\n!upload - to upload a file to the server\n!files - to query the server for its list of available files\n!name_of_file - to download one of the listed files from the server\n!broadcast - to send a broadcast to all active clients\n!exit - to exit\n");
 
 			// input and out streams
 			//DataInputStream inStream = new DataInputStream(s.getInputStream());
