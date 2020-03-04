@@ -166,23 +166,23 @@ class ClientController implements Runnable
 				System.out.println(sReceived); 
 				
 				//Logout
-				if(sReceived.equals("exit"))
+				if(sReceived.equals("!exit"))
 				{ 
-					System.out.println("test if reaches this"); // trace statement to see if client commands are reaching server side
+					//System.out.println("test if reaches this"); // trace statement to see if client commands are reaching server side
 					this.isloggedin=false; 
-					//this.s.close(); 
+					this.s.close(); 
 					break; 
 				}
 
 				//File Query
-				if(sReceived.equals("!files"))
+				else if(sReceived.equals("!files"))
 				{ 
 					getList("./files");
 					break; 
 				}
 				
 				// File Download
-				if(sReceived.equals("!down"))
+				else if(sReceived.equals("!down"))
 				{ 
 					downloadFile(s, "doesnt matter atm");
 					break; 
@@ -191,19 +191,33 @@ class ClientController implements Runnable
 
 				
 				// String Parsing (seperating message and recipient)
-				StringTokenizer sToken = new StringTokenizer(sReceived, "#"); 
-				String MsgToSend = sToken.nextToken(); 
-				String recipient = sToken.nextToken(); 
+				else if (sReceived.contains("#")) {
+					StringTokenizer sToken = new StringTokenizer(sReceived, "#");
+					String MsgToSend = sToken.nextToken();
+					String recipient = sToken.nextToken();
 
-				// search for the recipient in the connected devices list. If found, send message 
-				for (ClientController tempClient : MyServer.activeClients) 
-				{ 
-					if (tempClient.name.equals(recipient) && tempClient.isloggedin==true) 
-					{ 
-						tempClient.outStream.writeUTF(this.name+" : "+MsgToSend); 
-						break; 
-					} 
-				} 
+					// search for the recipient in the connected devices list. If found, send
+					// message
+					for (ClientController tempClient : MyServer.activeClients) {
+						if (tempClient.name.equals(recipient) && tempClient.isloggedin == true) {
+							tempClient.outStream.writeUTF(this.name + " : " + MsgToSend);
+							break;
+						}
+					}
+				}
+				else {
+					StringTokenizer sToken = new StringTokenizer(sReceived, "#");
+					String MsgToSend = sToken.nextToken();
+					//String recipient = sToken.nextToken();
+
+					//search for the recipient in the connected devices list. If found, send message
+					for (ClientController tempClient : MyServer.activeClients) {
+					//	if (tempClient.name.equals(recipient) && tempClient.isloggedin == true) {
+							tempClient.outStream.writeUTF(this.name + " : " + MsgToSend);
+							break;
+					//	}
+					}
+				}
 			} catch (IOException e) { 
 				
 				e.printStackTrace(); 

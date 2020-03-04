@@ -33,7 +33,8 @@ public class MyClient
 			System.out.println("To interact with server:\n!upload - to upload a file to the server\n!files - to query the server for its list of available files\n!name_of_file - to download one of the listed files from the server\n!exit - to exit\n\n");
 
 			// input and out streams
-			DataInputStream inStream = new DataInputStream(s.getInputStream());
+			//DataInputStream inStream = new DataInputStream(s.getInputStream());
+			BufferedReader d = new BufferedReader(new InputStreamReader(s.getInputStream()));
 			DataOutputStream outStream = new DataOutputStream(s.getOutputStream());
 
 			// sendMessage thread
@@ -60,20 +61,27 @@ public class MyClient
 			Thread readMessage = new Thread(new Runnable() {
 				@Override
 				public void run() {
-					while (true) {
 
-						try {
-							// read the message sent to this client
-							String msg = inStream.readUTF(); // this was producing errors
-							System.out.println(msg);
+					try {
+						// read the message sent to this client
+						// String msg = inStream.readUTF(); // this was producing errors
+						String msg = d.readLine();
+						while (msg!=null && !msg.equals("!exit")) {
+							//if (msg != null) {
+								System.out.println(msg);
+							//}
+							msg = d.readLine();
 						}
-/* 						 catch (EOFException ex) {
-							run();
-						}  */
-						catch (IOException e) {
-							e.printStackTrace();
-						}
+						
+						//System.out.println("hi, thread should be ending.");
 					}
+					/*
+					 * catch (EOFException ex) { run(); }
+					 */
+					catch (IOException e) {
+						e.printStackTrace();
+					}
+
 				}
 			}); 
 
