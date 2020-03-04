@@ -32,7 +32,7 @@ public class MyServer {
 		return activeClients;
 	}
 
-	boolean onlineStatus() {
+	static boolean onlineStatus() {
 		// check to see if there are any active clients on server
 		return !MyServer.activeClients.isEmpty();
 	}
@@ -40,16 +40,17 @@ public class MyServer {
 	public static void main(String[] args) throws IOException {
 		File myFile = new File("./files/test.html");
 
-		ServerSocket sServer = new ServerSocket(6969);
-		Socket s;
+		//starting server and listening to port
 
-		System.out.println("...Server Online... ");
+		ServerSocket sServer = new ServerSocket(6969);
+
+
+		System.out.println("...Server Online... \n ...Port: 6969... ");
 
 		// infinite loop to catch new clients
 		while (true) {
-			s = sServer.accept();
-			System.out.println("...Incoming client request... ");
-			System.out.println(s);
+			Socket s = sServer.accept();
+			System.out.println("...Incoming client request...\n"+s);
 
 			// input and output streams
 			DataInputStream inStream = new DataInputStream(s.getInputStream());
