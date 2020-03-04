@@ -15,100 +15,110 @@ import java.net.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
-import java.util.Scanner;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 // Server class 
-public class MyServer 
-{ 
+public class MyServer {
 
 	// Active cClients Storage & Count
-	static Vector<ClientController> activeClients = new Vector<>(); 
-	static int count = 0; 
+	Vector<ClientController> activeClients = new Vector<>();
+	int count = 0;
 
-	static Vector<String> fileList = new Vector<>();
+	Vector<String> fileList = new Vector<>();
+
+	Vector<ClientController> getClients() 
+	{
+		//returns vector of all active clients
+        return activeClients;
+	}
 	
 
-	public static void main(String[] args) throws IOException 
-	{
-		File myFile = new File ("./files/test.html");
-			
+	boolean onlineStatus() 
+		{
+			//check to see if there are any active clients on server
+			return !this.activeClients.isEmpty();
+		}
+
+
+	public static void main(String[] args) throws IOException {
+		File myFile = new File("./files/test.html");
+
 		ServerSocket sServer = new ServerSocket(6969);
 		Socket s;
+
 		System.out.println("...Server Online... ");
 
-
-		
 		// infinite loop to catch new clients
-		while (true)
-		{
+		while (true) {
 			s = sServer.accept();
 			System.out.println("...Incoming client request... ");
 			System.out.println(s);
-		
-			//input and output streams
+
+			// input and output streams
 			DataInputStream inStream = new DataInputStream(s.getInputStream());
 			DataOutputStream outStream = new DataOutputStream(s.getOutputStream());
 
 			// Create a new handler object and corrosponding thread
 			System.out.println("...Creating new handler, please wait...");
-			ClientController cController = new ClientController(s,"client " + count, inStream, outStream);
+			ClientController cController = new ClientController(s, "client " + count, inStream, outStream);
 			Thread t = new Thread(cController);
-		
+
 			// add this client to active clients list
 			activeClients.add(cController);
 			System.out.println("Client successfully added list");
-		 
-			//Start thread and inc counter
+
+			// Start thread and inc counter
 			t.start();
 			count++;
 		}
-	} 
-} 
+	}
+}
 
-// ClientController class 
-// Thread class extention to be instantiated each time a request comes to allow multiple threads
+// ClientController class
+// Thread class extention to be instantiated each time a request comes to allow
+// multiple threads
 // Breaks up message into "message" & "recipient" parts and handles accordingly
-class ClientController implements Runnable
-{
-	//Variable Declarations
-	Scanner scn = new Scanner(System.in); 
-	private String name; 
-	final DataInputStream inStream; 
-	final DataOutputStream outStream; 
-	Socket s; 
-	boolean isloggedin; 
-	
-	// Constructor
-	public ClientController(Socket s, String name, DataInputStream inStream, DataOutputStream outStream) 
-	{ 
-		this.inStream = inStream; 
-		this.outStream = outStream; 
-		this.name = name; 
-		this.s = s; 
-		this.isloggedin=true; 
-	} 
+class ClientController implements Runnable {
+	// Variable Declarations
+	Scanner scn = new Scanner(System.in);
+	private String name;
+	final DataInputStream inStream;
+	final DataOutputStream outStream;
+	Socket s;
+	boolean isloggedin;
 
-	String getList(String dest)
-	{
-		//returns list of files in selected dir
-		try (Stream<Path> walk = Files.walk(Paths.get(dest))) 
-		{
+	// Constructor
+	public ClientController(Socket s, String name, DataInputStream inStream, DataOutputStream outStream) {
+		this.inStream = inStream;
+		this.outStream = outStream;
+		this.name = name;
+		this.s = s;
+		this.isloggedin = true;
+	}
+
+	String getList(String dest) {
+		// returns list of files in selected dir
+		try (Stream<Path> walk = Files.walk(Paths.get(dest))) {
 
 			List<String> result = walk.filter(Files::isRegularFile).map(x -> x.toString()).collect(Collectors.toList());
-	
+
 			result.forEach(System.out::println);
 			return result.toString();
-	
-		} 
-		catch (IOException e) 
-		{
+
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		return "404";
 	}
+
+	void currentUsers() {
+		if (MyServer.onlineStatus())
+			{
+
+			}
+	}
+
 
 	void downloadFile(Socket s, String file)  throws IOException
 	{
@@ -204,20 +214,25 @@ class ClientController implements Runnable
 							tempClient.outStream.writeUTF(this.name + " : " + MsgToSend);
 							break;
 						}
+						else
+						{
+							this.outStream.writeUTF(recipient + " is not online, try again");
+							break;
+						}
 					}
 				}
 				else {
-					StringTokenizer sToken = new StringTokenizer(sReceived, "#");
-					String MsgToSend = sToken.nextToken();
+					this.outStream.writeUTF("Please Enter Valid Input");
+					break;
 					//String recipient = sToken.nextToken();
 
 					//search for the recipient in the connected devices list. If found, send message
-					for (ClientController tempClient : MyServer.activeClients) {
+					//for (ClientController tempClient : MyServer.activeClients) {
 					//	if (tempClient.name.equals(recipient) && tempClient.isloggedin == true) {
-							tempClient.outStream.writeUTF(this.name + " : " + MsgToSend);
-							break;
+							//tempClient.outStream.writeUTF(this.name + " : " + MsgToSend);
+							//break;
 					//	}
-					}
+					//}
 				}
 			} catch (IOException e) { 
 				

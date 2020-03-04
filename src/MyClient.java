@@ -48,6 +48,9 @@ public class MyClient
 
 						try {
 							// write on the output stream
+							if (msg.equals("!down")){
+								downloadFile(s, "download.html");
+							}
 							outStream.writeUTF(msg);
 						} catch (IOException e) {
 							e.printStackTrace();
@@ -68,9 +71,12 @@ public class MyClient
 						String msg = d.readLine();
 						while (msg!=null && !msg.equals("!exit")) {
 							//if (msg != null) {
-								System.out.println(msg);
-							//}
-							msg = d.readLine();
+
+								//else{
+									System.out.println(msg);
+								//}
+									msg = d.readLine();
+								//}
 						}
 						
 						//System.out.println("hi, thread should be ending.");
@@ -99,7 +105,7 @@ public class MyClient
 	static void downloadFile(Socket s, String file)  throws UnknownHostException, IOException
 	{
 		//Download file from server
-		byte[] b = new byte[9999999];
+		byte[] b = new byte[23520];
 		InputStream is = s.getInputStream();
 		FileOutputStream fr = new FileOutputStream(file);
 		BufferedOutputStream bos = new BufferedOutputStream(fr);
